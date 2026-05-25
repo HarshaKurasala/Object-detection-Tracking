@@ -238,6 +238,6 @@ MIT License - feel free to use this for your own projects
 
 ---
 
-**Built with ❤️ during my internship at CodeAlpha**
+**Built as part of my internship at CodeAlpha**
 
-Feel free to reach out if you have questions or suggestions!
+<img width="905" height="759" alt="Screenshot 2026-05-25 114547" src="https://github.com/user-attachments/assets/9f055aeb-d5d5-4fb7-be4a-c45e6022d5aa" />
