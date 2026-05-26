@@ -3,9 +3,17 @@ import cv2
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
 class ObjectTracker:
+    # Constructor to initialize DeepSORT multi-object tracker
+    # Parameters: max_age - maximum frames to keep track before removal (default 30)
+    #            n_init - number of detections needed to confirm track (default 1)
     def __init__(self, max_age=30, n_init=1):
         self.tracker = DeepSort(max_age=max_age, n_init=n_init)
         
+    # Updates tracker with new detections from current frame
+    # Performs data association and generates persistent track IDs across frames
+    # Parameters: detections - list of detection dictionaries from detector
+    #            frame - current video frame for deep feature extraction
+    # Returns: list of confirmed track dictionaries with IDs and trajectories
     def update(self, detections, frame):
         try:
             if not detections:
@@ -56,6 +64,10 @@ class ObjectTracker:
             print(f"[ERROR] Tracker update failed: {e}")
             return []
     
+    # Draws tracked object bounding boxes with persistent track IDs on frame
+    # Parameters: frame - input image to draw on
+    #            tracks - list of track dictionaries from update() method
+    # Returns: annotated frame with tracked boxes labeled with IDs
     def draw_tracks(self, frame, tracks):
         try:
             if not tracks:
@@ -78,6 +90,9 @@ class ObjectTracker:
             print(f"[ERROR] draw_tracks failed: {e}")
             return frame
     
+    # Helper method to assign consistent colors to different track IDs
+    # Parameter: tid - track identifier
+    # Returns: BGR color tuple (B, G, R) for consistent visualization across frames
     def _get_color(self, tid):
         colors = [
             (255, 56, 56), (255, 157, 51), (255, 225, 51), (99, 226, 87),
@@ -86,6 +101,11 @@ class ObjectTracker:
         ]
         return colors[int(tid) % len(colors)]
     
+    # Helper method to draw text labels on frames with background rectangle
+    # Parameters: frame - image to draw on
+    #            text - label text to display (track ID and class name)
+    #            x, y - position for label placement
+    #            color - BGR color tuple for the rectangle background
     def _put_label(self, frame, text, x, y, color):
         try:
             (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)

@@ -80,6 +80,8 @@ function App() {
   const [fullscreenImageInput, setFullscreenImageInput] = useState(false)
   const [fullscreenVideoInput, setFullscreenVideoInput] = useState(false)
 
+  // Effect hook to fetch and update live statistics when camera is active
+  // Polls the stats endpoint every 500ms to get FPS, object counts, and tracked objects
   useEffect(() => {
     const interval = setInterval(async () => {
       if (cameraActive) {
@@ -120,6 +122,9 @@ function App() {
     }
   }
 
+  // Event handler for image file upload
+  // Stores the uploaded file and creates preview URL
+  // Updates UI message to indicate image is ready for detection
   const handleImageUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -131,6 +136,10 @@ function App() {
     }
   }
 
+  // Async function to run object detection on uploaded image
+  // Sends image to backend /detect_image endpoint with confidence threshold
+  // Displays detected objects annotated with bounding boxes and confidence scores
+  // Handles errors and shows appropriate status messages
   const runImageDetection = async () => {
     if (!imageFile) {
       setImageMessage('⚠️ Please upload an image.')
@@ -167,6 +176,9 @@ function App() {
     setProcessing(false)
   }
 
+  // Event handler for video file upload
+  // Stores the uploaded video file
+  // Updates UI message to indicate video is ready for tracking
   const handleVideoUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -177,6 +189,10 @@ function App() {
     }
   }
 
+  // Async function to run object tracking on uploaded video
+  // Sends video to backend /process_video endpoint for frame-by-frame tracking
+  // Displays tracked video with persistent object IDs across frames
+  // Shows processing status and handles long-running video processing with timeout
   const runVideoTracking = async () => {
     if (!videoFile) {
       setVideoMessage('⚠️ Please upload a video.')
@@ -214,6 +230,8 @@ function App() {
     setProcessing(false)
   }
 
+  // Clears uploaded image and resets image detection state
+  // Removes preview, result, and resets status message
   const removeImage = () => {
     setImageFile(null)
     setImagePreview(null)
@@ -221,15 +239,23 @@ function App() {
     setImageMessage('Upload an image and click Run detection to start.')
   }
 
+  // Clears uploaded video and resets video tracking state
+  // Removes video file and result, resets status message
   const removeVideo = () => {
     setVideoFile(null)
     setVideoResult(null)
     setVideoMessage('Upload a video and click Run tracking to start.')
   }
 
+  // Calculate person count from object statistics
   const personCount = Object.entries(stats.object_counts).filter(([k]) => k === 'person').reduce((a, [, v]) => a + v, 0)
+  
+  // Calculate vehicle count from object statistics (cars, trucks, buses, motorcycles)
   const vehicleCount = Object.entries(stats.object_counts).filter(([k]) => ['car', 'truck', 'bus', 'motorcycle'].includes(k)).reduce((a, [, v]) => a + v, 0)
 
+  // Main App component render
+  // Displays tabbed interface for webcam detection, image detection, and video tracking
+  // Includes parameter controls and real-time statistics display
   return (
     <div className="app">
       {/* Hero Section */}

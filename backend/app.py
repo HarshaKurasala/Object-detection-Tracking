@@ -39,14 +39,21 @@ class AppState:
 
 app_state = AppState()
 
+# GET endpoint to check API status
+# Returns a simple message confirming the API is running
 @app.get("/")
 def root():
     return {"message": "VisionScan API", "status": "running"}
 
+# GET endpoint to check API health status
+# Returns health status and current timestamp for monitoring
 @app.get("/health")
 def health():
     return {"status": "healthy", "timestamp": time.time()}
 
+# POST endpoint to start the webcam feed
+# Initializes video capture from default camera (index 0)
+# Returns status message indicating success or failure
 @app.post("/start_camera")
 def start_camera():
     try:
@@ -69,6 +76,9 @@ def start_camera():
         print(f"[ERROR] start_camera: {e}")
         return {"status": "error", "message": str(e)}
 
+# POST endpoint to stop the webcam feed
+# Releases video capture resources and sets camera_active flag to False
+# Returns status message indicating success or failure
 @app.post("/stop_camera")
 def stop_camera():
     try:
@@ -84,6 +94,10 @@ def stop_camera():
         print(f"[ERROR] stop_camera: {e}")
         return {"status": "error", "message": str(e)}
 
+# Generator function that continuously reads frames from camera
+# Performs object detection and tracking on each frame
+# Encodes frames as JPEG and yields them for streaming
+# Updates real-time statistics (FPS, object counts, etc.)
 def generate_frames():
     frame_count = 0
     start_time = time.time()
@@ -146,14 +160,22 @@ def generate_frames():
             app_state.camera_active = False
             break
 
+# GET endpoint to stream live video feed from camera
+# Returns a streaming response with continuous MJPEG frames
+# Each frame includes detection boxes and real-time statistics
 @app.get("/video_feed")
 def video_feed():
     return StreamingResponse(generate_frames(), media_type="multipart/x-mixed-replace; boundary=frame")
 
+# GET endpoint to retrieve current detection and tracking statistics
+# Returns FPS, total object count, object breakdown by class, and tracked object IDs
 @app.get("/stats")
 def get_stats():
     return app_state.stats
 
+# POST endpoint to detect objects in an uploaded image
+# Accepts image file, confidence threshold, and label visibility settings
+# Returns annotated image with detection bounding boxes and confidence scores
 @app.post("/detect_image")
 async def detect_image(file: UploadFile = File(...), threshold: float = Form(0.5), show_labels: bool = Form(True)):
     output_path = None
@@ -211,6 +233,10 @@ async def detect_image(file: UploadFile = File(...), threshold: float = Form(0.5
                 pass
         return {"error": str(e)}
 
+# POST endpoint to process and track objects in an uploaded video file
+# Performs frame-by-frame object detection and multi-object tracking
+# Returns processed video with tracked object bounding boxes and IDs
+# Accepts various video formats (MP4, AVI, MOV, etc.)
 @app.post("/process_video")
 async def process_video(file: UploadFile = File(...), threshold: float = Form(0.5), show_labels: bool = Form(True)):
     input_path = None
